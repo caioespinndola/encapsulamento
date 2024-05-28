@@ -1,0 +1,230 @@
+public class Produto {
+    private String nome;
+    private double preco;
+
+    public Produto(String nome, double preco) {
+        this.nome = nome;
+        this.preco = preco;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public double getPreco() {
+        return preco;
+    }
+
+    public void setPreco(double preco) {
+        this.preco = preco;
+    }
+
+    @Override
+    public String toString() {
+        return "Produto{" +
+                "nome='" + nome + '\'' +
+                ", preco=" + preco +
+                '}';
+    }
+}
+public class ProdutoVendido {
+    private Produto produto;
+    private int quantidade;
+    private double precoUnitario;
+    private double subtotal;
+
+    public ProdutoVendido(Produto produto, int quantidade) {
+        this.produto = produto;
+        this.quantidade = quantidade;
+        this.precoUnitario = produto.getPreco();
+        this.subtotal = quantidade * precoUnitario;
+    }
+
+    public Produto getProduto() {
+        return produto;
+    }
+
+    public void setProduto(Produto produto) {
+        this.produto = produto;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
+
+    public double getPrecoUnitario() {
+        return precoUnitario;
+    }
+
+    public void setPrecoUnitario(double precoUnitario) {
+        this.precoUnitario = precoUnitario;
+    }
+
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    @Override
+    public String toString() {
+        return "ProdutoVendido{" +
+                "produto=" + produto +
+                ", quantidade=" + quantidade +
+                ", precoUnitario=" + precoUnitario +
+                ", subtotal=" + subtotal +
+                '}';
+    }
+}
+import java.util.ArrayList;
+import java.util.List;
+
+public class Venda {
+    private int id;
+    private List<ProdutoVendido> produtosVendidos;
+    private double total;
+
+    public Venda(int id) {
+        this.id = id;
+        this.produtosVendidos = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public List<ProdutoVendido> getProdutosVendidos() {
+        return produtosVendidos;
+    }
+
+    public void setProdutosVendidos(List<ProdutoVendido> produtosVendidos) {
+        this.produtosVendidos = produtosVendidos;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void calcularTotal() {
+        total = 0;
+        for (ProdutoVendido pv : produtosVendidos) {
+            total += pv.getSubtotal();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Venda{" +
+                "id=" + id +
+                ", produtosVendidos=" + produtosVendidos +
+                ", total=" + total +
+                '}';
+    }
+}
+import java.util.ArrayList;
+import java.util.List;
+
+public class Controlador {
+    private List<Produto> estoque;
+    private List<Venda> vendas;
+
+    public Controlador() {
+        this.estoque = new ArrayList<>();
+        this.vendas = new ArrayList<>();
+    }
+
+    public void cadastrarProduto(Produto produto) {
+        estoque.add(produto);
+    }
+
+    public void listarProdutos() {
+        for (Produto produto : estoque) {
+            System.out.println(produto);
+        }
+    }
+
+    public void realizarVenda(Venda venda) {
+        vendas.add(venda);
+        for (ProdutoVendido pv : venda.getProdutosVendidos()) {
+            Produto produtoEstoque = estoque.stream().filter(p -> p.getNome().equals(pv.getProduto().getNome())).findFirst().orElse(null);
+            if (produtoEstoque != null) {
+            }
+        }
+        venda.calcularTotal();
+    }
+
+    public void listarVendas() {
+        for (Venda venda : vendas) {
+            System.out.println(venda);
+        }
+    }
+}
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class ProdutoJFrame extends JFrame {
+    private JTextField nomeTextField;
+    private JTextField precoTextField;
+    private JButton okButton;
+    private Controlador controlador;
+
+    public ProdutoJFrame(Controlador controlador) {
+        this.controlador = controlador;
+
+        setTitle("Cadastro de Produto");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null);
+
+        JLabel nomeLabel = new JLabel("Nome:");
+        nomeLabel.setBounds(10, 20, 80, 25);
+        add(nomeLabel);
+
+        nomeTextField = new JTextField();
+        nomeTextField.setBounds(100, 20, 165, 25);
+        add(nomeTextField);
+
+        JLabel precoLabel = new JLabel("Preço:");
+        precoLabel.setBounds(10, 50, 80, 25);
+        add(precoLabel);
+
+        precoTextField = new JTextField();
+        precoTextField.setBounds(100, 50, 165, 25);
+        add(precoTextField);
+
+        okButton = new JButton("OK");
+        okButton.setBounds(10, 80, 80, 25);
+        add(okButton);
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nome = nomeTextField.getText();
+                double preco = Double.parseDouble(precoTextField.getText());
+                Produto produto = new Produto(nome, preco);
+                controlador.cadastrarProduto(produto);
+                JOptionPane.showMessageDialog(null, "Produto cadastrado com sucesso!");
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        Controlador controlador = new Controlador();
+        ProdutoJFrame frame = new ProdutoJFrame(controlador);
+        frame.setVisible(true);
+    }
+}
